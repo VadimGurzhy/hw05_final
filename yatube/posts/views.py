@@ -4,7 +4,6 @@ from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from .utils import get_paginator
 from django.views.decorators.cache import cache_page
-from django.core.paginator import Paginator
 
 PAGINATOR_PAGES = 10
 
@@ -34,11 +33,9 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()  # type: ignore
-    count = author.posts.count()  # type: ignore
     pagin = get_paginator(posts, request)
     context = {
         'author': author,
-        'count': count,
         'posts': posts,
         'page_obj': pagin['page_obj'],
     }
@@ -122,12 +119,10 @@ def follow_index(request):
     template = 'posts/follow.html'
     title = 'Публикации интересных авторов'
     posts = Post.objects.filter(author__following__user=request.user)
-    paginator = Paginator(posts, PAGINATOR_PAGES)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    pagin = get_paginator(posts, request)
     context = {
         'title': title,
-        'page_obj': page_obj,
+        'page_obj': pagin['page_obj'],
     }
     return render(request, template, context)
 
