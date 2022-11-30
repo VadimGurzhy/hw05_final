@@ -5,15 +5,13 @@ from django.contrib.auth.decorators import login_required
 from .utils import get_paginator
 from django.views.decorators.cache import cache_page
 
-PAGINATOR_PAGES = 10
-
 
 @cache_page(20)
 def index(request):
     post_list = Post.objects.all().order_by('-pub_date')
     pagin = get_paginator(post_list, request)
     context = {
-        'page_obj': pagin['page_obj'],
+        'page_obj': pagin,
     }
     return render(request, 'posts/index.html', context)
 
@@ -24,7 +22,7 @@ def group_posts(request, slug):
         group=group).order_by('-pub_date')
     pagin = get_paginator(posts, request)
     context = {
-        'page_obj': pagin['page_obj'],
+        'page_obj': pagin,
         'group': group,
     }
     return render(request, 'posts/group_list.html', context)
@@ -37,7 +35,7 @@ def profile(request, username):
     context = {
         'author': author,
         'posts': posts,
-        'page_obj': pagin['page_obj'],
+        'page_obj': pagin,
     }
     return render(request, 'posts/profile.html', context)
 
@@ -117,12 +115,10 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     template = 'posts/follow.html'
-    title = 'Публикации интересных авторов'
     posts = Post.objects.filter(author__following__user=request.user)
     pagin = get_paginator(posts, request)
     context = {
-        'title': title,
-        'page_obj': pagin['page_obj'],
+        'page_obj': pagin
     }
     return render(request, template, context)
 
